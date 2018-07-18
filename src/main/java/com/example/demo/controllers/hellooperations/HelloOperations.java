@@ -8,11 +8,32 @@ import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import org.springframework.http.ResponseEntity;
 
-@Api(value = "exampleApi", description = "hello world swagger api description")
+@Api(value = "exampleApi")
 public interface HelloOperations {
 
     @ApiOperation(value = "Get hello name greetings", response = HelloNameResponse.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successful"),
+            @ApiResponse(code = 500, message = "Server error. Something wrong happened!", response = GenericErrorResponse.class)})
     ResponseEntity<Object> helloName(@ApiParam(value = "Name to say hello", required = true) String name);
+
+    @ApiOperation(value = "Get hello from a POST greetings", response = HelloNameResponse.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successful"),
+            @ApiResponse(code = 500, message = "Server error. Something wrong happened!", response = GenericErrorResponse.class)})
+    ResponseEntity<Object> helloNamePost(@ApiParam(value = "Name to say hello in. json body request", required = true) HelloUsingPostRequest helloUsingPostRequest);
+
+    @ApiOperation(value = "Get hello with callback using GET", response = HelloNameResponse.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successful"),
+            @ApiResponse(code = 500, message = "Server error. Something wrong happened!", response = GenericErrorResponse.class)})
+    ResponseEntity<Object> helloNameCallback(@ApiParam(value = "Name to say hello", required = true) String name);
+
+    @ApiOperation(value = "Get hello with callback using POST", response = HelloNameResponse.class)
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successful"),
+            @ApiResponse(code = 500, message = "Server error. Something wrong happened!", response = GenericErrorResponse.class)})
+    ResponseEntity<Object> helloNamePostCallback(@ApiParam(value = "Name to say hello in. json body request", required = true) HelloUsingPostRequest helloUsingPostRequest);
 
     @ApiOperation(value = "Adds a name to the list and responds")
     @ApiResponses(value = {

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -37,12 +38,39 @@ public class HelloOperationsController implements HelloOperations {
     }
 
     @Override
+    @PostMapping(value = "/hello", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<Object> helloNamePost(@Validated @RequestBody final HelloUsingPostRequest helloUsingPostRequest) {
+        return new ResponseEntity<>(HelloNameResponse.builder().message("hello " + helloUsingPostRequest.getName()).build(), HttpStatus.OK);
+    }
+
+    @Override
+    @GetMapping(value = "/hello/callback/{name}", produces = "application/json")
+    public ResponseEntity<Object> helloNameCallback(
+            @Validated
+            @NotNull
+            @NotBlank
+            @Size(min = 1, max = 256)
+            @PathVariable("name") final String name) {
+
+        final RestTemplate restTemplate = new RestTemplate();
+        return restTemplate.getForEntity("http://localhost:8080/hello/martincallback", Object.class);
+    }
+
+    @Override
+    @PostMapping(value = "/hello/callback-with-post/{name}", consumes = "application/json", produces = "application/json")
+    public ResponseEntity<Object> helloNamePostCallback(@Validated @RequestBody final HelloUsingPostRequest helloUsingPostRequest) {
+
+        final HelloUsingPostRequest requestObject = HelloUsingPostRequest.builder().name(helloUsingPostRequest.getName()).build();
+        final RestTemplate restTemplate = new RestTemplate();
+        return restTemplate.postForEntity("http://localhost:8080/hello", requestObject, Object.class);
+    }
+
+    @Override
     @PostMapping(value = "/hello/names/add", consumes = "application/json", produces = "application/json")
     public ResponseEntity<Object> addName(
             @Validated @RequestBody final AddOrRemoveNameRequest addOrRemoveNameRequest) {
 
         if (names.contains(addOrRemoveNameRequest.getName())) {
-
             final GenericErrorResponse errorResponse = GenericErrorResponse.builder()
                     .errorMessage("The name" + addOrRemoveNameRequest.getName() + " already exists!")
                     .errorCode(AppConstants.ERROR_NAME_ALREADY_EXISTS).build();
